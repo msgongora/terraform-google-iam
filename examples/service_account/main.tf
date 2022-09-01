@@ -14,25 +14,54 @@
  * limitations under the License.
  */
 
+locals {
+  # service_accounts    = [
+  #   "service_account1",
+  #   "service_account2"
+  # ]
+  service_account_one = "service_account1"
+  service_account_two = "service_account2"
+  project_id          = "project-test0001"
+  sa_email            = "service_account3_differentproject@project-test0001.iam.gserviceaccount.com"
+  group_email         = "google-group@organization.com"
+  user_email          = "user_email@organization.com"
+}
+
+# resource "google_service_account" "service_accounts" {
+#   for_each = toset( local.service_accounts )
+#   account_id = each.key
+# }
+
+resource "google_service_account" "service_account_one" {
+  account_id = local.service_account_one
+  project    = local.project_id
+}
+
+resource "google_service_account" "service_account_two" {
+  account_id = local.service_account_one
+  project    = local.project_id
+}
+
 /******************************************
   Module service_account_iam_binding calling
  *****************************************/
 module "service_account_iam_binding" {
-  source = "../../modules/service_accounts_iam/"
+  source = "terraform-google-modules/iam/google//service_accounts_iam"
 
-  service_accounts = [var.service_account_one, var.service_account_two]
-  project          = var.service_account_project
+  # service_accounts = local.service_accounts
+  service_accounts = [local.service_account_one, local.service_account_two]
+  project          = local.project_id
   mode             = "additive"
   bindings = {
     "roles/iam.serviceAccountKeyAdmin" = [
-      "serviceAccount:${var.sa_email}",
-      "group:${var.group_email}",
-      "user:${var.user_email}",
+      "serviceAccount:${local.sa_email}",
+      "group:${local.group_email}",
+      "user:${local.user_email}",
     ]
     "roles/iam.serviceAccountTokenCreator" = [
-      "serviceAccount:${var.sa_email}",
-      "group:${var.group_email}",
-      "user:${var.user_email}",
+      "serviceAccount:${local.sa_email}",
+      "group:${local.group_email}",
+      "user:${local.user_email}",
     ]
   }
 }
