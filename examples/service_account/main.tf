@@ -19,12 +19,14 @@ locals {
   #   "service_account1",
   #   "service_account2"
   # ]
-  service_account_one = "service_account1"
-  service_account_two = "service_account2"
-  project_id          = "project-test0001"
-  sa_email            = "service_account3_differentproject@project-test0001.iam.gserviceaccount.com"
-  group_email         = "google-group@organization.com"
-  user_email          = "user_email@organization.com"
+  project_id                = "project-test0001"
+  service_account_one       = "service-account1"
+  service_account_two       = "service-account2"
+  service_account_one_email = "service-account1@${local.project_id}..iam.gserviceaccount.com"
+  service_account_two_email = "service-account2@${local.project_id}..iam.gserviceaccount.com"
+  sa_email                  = "service_account3_differentproject@project-test0002.iam.gserviceaccount.com"
+  group_email               = "google-group@organization.com"
+  user_email                = "user_email@organization.com"
 }
 
 # resource "google_service_account" "service_accounts" {
@@ -46,12 +48,15 @@ resource "google_service_account" "service_account_two" {
   Module service_account_iam_binding calling
  *****************************************/
 module "service_account_iam_binding" {
-  source = "terraform-google-modules/iam/google//service_accounts_iam"
+  source = "terraform-google-modules/iam/google//modules/service_accounts_iam"
 
   # service_accounts = local.service_accounts
-  service_accounts = [local.service_account_one, local.service_account_two]
-  project          = local.project_id
-  mode             = "additive"
+  service_accounts = [
+    local.service_account_one_email,
+    local.service_account_two_email
+  ]
+  project = local.project_id
+  mode    = "additive"
   bindings = {
     "roles/iam.serviceAccountKeyAdmin" = [
       "serviceAccount:${local.sa_email}",
